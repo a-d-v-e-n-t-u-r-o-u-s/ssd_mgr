@@ -29,7 +29,6 @@
 #include <assert.h>
 #include "system.h"
 #include "debug.h"
-#include "common.h"
 
 typedef struct
 {
