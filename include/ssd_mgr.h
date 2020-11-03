@@ -29,6 +29,17 @@
 
 #define SSD_MGR_MAX_MULTIPLEXED_DISPLAYS        4U
 
+#define SSD_DIGIT_0         (0u)
+#define SSD_DIGIT_1         (1u)
+#define SSD_DIGIT_2         (2u)
+#define SSD_DIGIT_3         (3u)
+#define SSD_DIGIT_4         (4u)
+#define SSD_DIGIT_5         (5u)
+#define SSD_DIGIT_6         (6u)
+#define SSD_DIGIT_7         (7u)
+#define SSD_DIGIT_8         (8u)
+#define SSD_DIGIT_9         (9u)
+
 typedef struct
 {
     uint8_t seg_config[8][2];

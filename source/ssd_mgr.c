@@ -48,18 +48,18 @@ static bool is_segment_inverted_logic;
 static bool is_turned_on;
 
 /*! \todo make it really in FLASH memory */
-static const bool digits_data[10][7] =
+static const uint8_t dig_data[10] =
 {
-    [0] = {  true, true, true, true, true, true, false},
-    [1] = {  false, true, true, false, false, false, false},
-    [2] = {  true, true, false, true, true, false, true},
-    [3] = {  true, true, true, true, false, false, true},
-    [4] = {  false, true, true, false, false, true, true},
-    [5] = {  true, false, true, true, false, true, true},
-    [6] = {  true, false, true, true, true, true, true},
-    [7] = {  true, true, true, false, false, false, false},
-    [8] = {  true, true, true, true, true, true, true},
-    [9] = {  true, true, true, true, false, true, true},
+    [SSD_DIGIT_0] = 0x3F,
+    [SSD_DIGIT_1] = 0x06,
+    [SSD_DIGIT_2] = 0x5B,
+    [SSD_DIGIT_3] = 0x4F,
+    [SSD_DIGIT_4] = 0x66,
+    [SSD_DIGIT_5] = 0x6D,
+    [SSD_DIGIT_6] = 0x7D,
+    [SSD_DIGIT_7] = 0x07,
+    [SSD_DIGIT_8] = 0x7F,
+    [SSD_DIGIT_9] = 0x6F,
 };
 
 static inline void clear(const uint8_t (*gpio)[2], uint8_t size,
@@ -73,15 +73,14 @@ static inline void clear(const uint8_t (*gpio)[2], uint8_t size,
     }
 }
 
-static void light_digit(const uint8_t (*gpio)[2], const bool *data,
-        uint8_t size, bool is_inverted_logic)
+static void light_segments(const uint8_t (*gpio)[2], uint8_t segs,
+        bool is_inverted_logic)
 {
-    //clear(gpio, size, is_inverted_logic);
-
-    for(uint8_t i = 0u; i < size; i++)
+    for(uint8_t i = 0u; i < 7u; i++)
     {
-        bool val = is_inverted_logic ? !data[i]: data[i];
-        GPIO_write_pin(gpio[i][0], gpio[i][1], val);
+        const bool val = (((segs >> i ) & 0x01u) != 0u);
+        GPIO_write_pin(gpio[i][0], gpio[i][1],
+                is_inverted_logic ? !val : val);
     }
 }
 
@@ -109,9 +108,7 @@ static void multiplex_in_digit_mode(uint16_t value)
 
     uint8_t digit = get_digit(value, display_no);
 
-    light_digit(segments, &digits_data[digit][0], 7U,
-            is_segment_inverted_logic);
-    //light(digit);
+    light_segments(segments, dig_data[digit], is_segment_inverted_logic);
 
     bool val = is_disp_inverted_logic ? false : true;
     GPIO_write_pin(displays[display_no][0], displays[display_no][1], val);
