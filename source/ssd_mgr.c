@@ -34,7 +34,8 @@
 uint16_t ssd_value;
 static SSD_MGR_config_t const *ssd_config;
 static uint8_t display_no;
-static bool is_turned_on;
+static SSD_MGR_displays_t *displays[SSD_MGR_MAX_MULTIPLEXED_DISPLAYS];
+static uint8_t displays_counter;
 
 /*! \todo make it really in FLASH memory */
 static const uint8_t dig_data[SSD_SENTINEL] =
@@ -50,14 +51,15 @@ static const uint8_t dig_data[SSD_SENTINEL] =
     [SSD_DIGIT_8] = 0x7F,
     [SSD_DIGIT_9] = 0x6F,
     [SSD_BLANK]   = 0x00,
+    [SSD_CHAR_C]  = 0x39,
 };
 
 static void clear(void)
 {
-    for(uint8_t i = 0u; i < ssd_config->displays_amount;  i++)
+    for(uint8_t i = 0u; i < displays_counter;  i++)
     {
-        GPIO_write_pin(ssd_config->displays[i][0],
-                ssd_config->displays[i][1],
+        GPIO_write_pin(displays[i]->config[0],
+                displays[i]->config[1],
                 ssd_config->is_displays_inverted);
     }
 }
@@ -73,70 +75,59 @@ static void set_segments(uint8_t segs)
     }
 }
 
-static void set_display(uint8_t no)
+static void set_display(uint8_t const *config)
 {
-    GPIO_write_pin(ssd_config->displays[no][0],
-            ssd_config->displays[no][1],
+    GPIO_write_pin(config[0], config[1],
             !ssd_config->is_displays_inverted);
 }
 
-static inline uint8_t get_digit(uint16_t value, uint8_t position)
-{
-     switch(position)
-     {
-         case 0:
-             return value%10u;
-         case 1:
-             return (value/10u)%10u;
-         case 2:
-             return (value/100u)%10u;
-         case 3:
-             return (value/1000u)%10u;
-     }
-
-     return 0U;
-}
-
-static void multiplex_in_digit_mode(uint16_t value)
-{
-    uint8_t digit = get_digit(value, display_no);
-
-    clear();
-    set_segments(dig_data[digit]);
-    set_display(display_no);
-
-    display_no++;
-    display_no %= ssd_config->displays_amount;
-}
 
 static void ssd_mgr_main(void)
 {
-    if(is_turned_on)
+    if(displays_counter != 0U)
     {
-        multiplex_in_digit_mode(ssd_value);
+        clear();
+        set_segments(dig_data[displays[display_no]->value]);
+        set_display(displays[display_no]->config);
+        display_no++;
+        display_no %= displays_counter;
     }
 }
 
-int8_t SSD_MGR_set(uint16_t value)
+int8_t SSD_MGR_set(SSD_MGR_displays_t *display, uint8_t value)
 {
-    if((value != UINT16_MAX) && (value > 9999U))
+    if(display == NULL)
     {
         return -1;
     }
 
-    if(value == UINT16_MAX)
+    if(value >= SSD_SENTINEL)
     {
-        is_turned_on = false;
-        clear();
-        display_no = 0u;
-    }
-    else
-    {
-        is_turned_on = true;
-        ssd_value = value;
+        return -1;
     }
 
+    display->value = value;
     return 0;
+}
+
+
+int8_t SSD_MGR_display_create(SSD_MGR_displays_t *display,
+        uint8_t const *config, uint8_t value)
+{
+    if(display != NULL &&
+        config != NULL &&
+        displays_counter < sizeof(displays)/sizeof(displays[0]))
+    {
+        display->config = config;
+        display->value = 0u;
+
+        GPIO_config_pin(config[0], config[1], GPIO_OUTPUT_PUSH_PULL);
+        displays[displays_counter] = display;
+        displays_counter++;
+        return 0;
+    }
+
+    return -1;
 }
 
 int8_t SSD_MGR_initialize(const SSD_MGR_config_t *config)
@@ -146,23 +137,10 @@ int8_t SSD_MGR_initialize(const SSD_MGR_config_t *config)
         return -1;
     }
 
-    if(config->displays_amount == 0)
-    {
-        return -1;
-    }
-
-    if(config->displays_amount > SSD_MGR_MAX_MULTIPLEXED_DISPLAYS)
-    {
-        return -1;
-    }
-
     if(SYSTEM_register_task(ssd_mgr_main, 5u) != 0)
     {
         return -1;
     }
-
-    is_turned_on = true;
-    ssd_config = config;
 
     for(uint8_t i = 0; i < 8u; i++)
     {
@@ -170,13 +148,6 @@ int8_t SSD_MGR_initialize(const SSD_MGR_config_t *config)
                 config->segments[i][1], GPIO_OUTPUT_PUSH_PULL);
     }
 
-    for(uint8_t i = 0; i < 4u; i++)
-    {
-        GPIO_config_pin(config->displays[i][0],
-                config->displays[i][1], GPIO_OUTPUT_PUSH_PULL);
-    }
-
-    clear();
-
+    ssd_config = config;
     return 0;
 }

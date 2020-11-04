@@ -40,17 +40,25 @@
 #define SSD_DIGIT_8         (8u)
 #define SSD_DIGIT_9         (9u)
 #define SSD_BLANK           (10u)
-#define SSD_SENTINEL        (11u)
+#define SSD_CHAR_C          (11u)
+#define SSD_SENTINEL        (12u)
+
+typedef struct
+{
+    uint8_t const *config;
+    uint8_t value;
+    bool is_active;
+} SSD_MGR_displays_t;
 
 typedef struct
 {
     uint8_t segments[8][2];
-    uint8_t (*displays)[2];
-    uint8_t displays_amount;
-    bool is_displays_inverted;
     bool is_segments_inverted;
+    bool is_displays_inverted;
 } SSD_MGR_config_t;
 
-int8_t SSD_MGR_set(uint16_t value);
+int8_t SSD_MGR_set(SSD_MGR_displays_t *display, uint8_t value);
+int8_t SSD_MGR_display_create(SSD_MGR_displays_t *display,
+        uint8_t const *config, uint8_t value);
 int8_t SSD_MGR_initialize(const SSD_MGR_config_t *config);
 #endif
