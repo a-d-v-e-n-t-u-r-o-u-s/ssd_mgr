@@ -42,18 +42,21 @@ static SSD_MGR_displays_t *displays[SSD_MGR_MAX_MULTIPLEXED_DISPLAYS];
 /*! \todo make it really in FLASH memory */
 static const uint8_t dig_data[SSD_SENTINEL] =
 {
-    [SSD_DIGIT_0] = 0x3F,
-    [SSD_DIGIT_1] = 0x06,
-    [SSD_DIGIT_2] = 0x5B,
-    [SSD_DIGIT_3] = 0x4F,
-    [SSD_DIGIT_4] = 0x66,
-    [SSD_DIGIT_5] = 0x6D,
-    [SSD_DIGIT_6] = 0x7D,
-    [SSD_DIGIT_7] = 0x07,
-    [SSD_DIGIT_8] = 0x7F,
-    [SSD_DIGIT_9] = 0x6F,
-    [SSD_BLANK]   = 0x00,
-    [SSD_CHAR_C]  = 0x39,
+    [SSD_DIGIT_0]       = 0x3F,
+    [SSD_DIGIT_1]       = 0x06,
+    [SSD_DIGIT_2]       = 0x5B,
+    [SSD_DIGIT_3]       = 0x4F,
+    [SSD_DIGIT_4]       = 0x66,
+    [SSD_DIGIT_5]       = 0x6D,
+    [SSD_DIGIT_6]       = 0x7D,
+    [SSD_DIGIT_7]       = 0x07,
+    [SSD_DIGIT_8]       = 0x7F,
+    [SSD_DIGIT_9]       = 0x6F,
+    [SSD_BLANK]         = 0x00,
+    [SSD_CHAR_h]        = 0x74,
+    [SSD_CHAR_C]        = 0x39,
+    [SSD_CHAR_F]        = 0x71,
+    [SSD_CHAR_DEGREE]   = 0x63,
 };
 
 static void clear(void)
