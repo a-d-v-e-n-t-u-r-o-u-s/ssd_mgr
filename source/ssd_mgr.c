@@ -30,12 +30,14 @@
 #include <assert.h>
 #include "system.h"
 #include "debug.h"
+#include "common.h"
 
-uint16_t ssd_value;
-static SSD_MGR_config_t const *ssd_config;
-static uint8_t display_no;
-static SSD_MGR_displays_t *displays[SSD_MGR_MAX_MULTIPLEXED_DISPLAYS];
+#define SSD_MGR_MAX_MULTIPLEXED_DISPLAYS        4U
+
 static uint8_t displays_counter;
+static uint8_t display_no;
+static SSD_MGR_config_t const *ssd_config;
+static SSD_MGR_displays_t *displays[SSD_MGR_MAX_MULTIPLEXED_DISPLAYS];
 
 /*! \todo make it really in FLASH memory */
 static const uint8_t dig_data[SSD_SENTINEL] =
@@ -66,7 +68,7 @@ static void clear(void)
 
 static void set_segments(uint8_t segs)
 {
-    for(uint8_t i = 0u; i < 7u; i++)
+    for(uint8_t i = 0u; i < ARRAY_2D_ROW(ssd_config->segments); i++)
     {
         const bool val = (((segs >> i ) & 0x01u) != 0u);
         GPIO_write_pin(ssd_config->segments[i][0],
@@ -86,15 +88,16 @@ static void ssd_mgr_main(void)
 {
     if(displays_counter != 0U)
     {
+        SSD_MGR_displays_t const *display = displays[display_no];
         clear();
-        set_segments(dig_data[displays[display_no]->value]);
-        set_display(displays[display_no]->config);
+        set_segments(dig_data[display->value]);
+        set_display(display->config);
         display_no++;
         display_no %= displays_counter;
     }
 }
 
-int8_t SSD_MGR_set(SSD_MGR_displays_t *display, uint8_t value)
+int8_t SSD_MGR_display_set(SSD_MGR_displays_t *display, uint8_t value)
 {
     if(display == NULL)
     {
@@ -112,11 +115,11 @@ int8_t SSD_MGR_set(SSD_MGR_displays_t *display, uint8_t value)
 
 
 int8_t SSD_MGR_display_create(SSD_MGR_displays_t *display,
-        uint8_t const *config, uint8_t value)
+        uint8_t const *config)
 {
     if(display != NULL &&
         config != NULL &&
-        displays_counter < sizeof(displays)/sizeof(displays[0]))
+        displays_counter < ARRAY_SIZE(displays))
     {
         display->config = config;
         display->value = 0u;
@@ -142,7 +145,7 @@ int8_t SSD_MGR_initialize(const SSD_MGR_config_t *config)
         return -1;
     }
 
-    for(uint8_t i = 0; i < 8u; i++)
+    for(uint8_t i = 0; i < ARRAY_2D_ROW(config->segments); i++)
     {
         GPIO_config_pin(config->segments[i][0],
                 config->segments[i][1], GPIO_OUTPUT_PUSH_PULL);

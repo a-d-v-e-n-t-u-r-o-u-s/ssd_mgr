@@ -20,14 +20,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 #ifndef SSD_MGR_H
 #define SSD_MGR_H
 
 #include <stdint.h>
 #include "gpio.h"
-
-#define SSD_MGR_MAX_MULTIPLEXED_DISPLAYS        4U
 
 #define SSD_DIGIT_0         (0u)
 #define SSD_DIGIT_1         (1u)
@@ -47,18 +44,17 @@ typedef struct
 {
     uint8_t const *config;
     uint8_t value;
-    bool is_active;
 } SSD_MGR_displays_t;
 
 typedef struct
 {
-    uint8_t segments[8][2];
+    uint8_t segments[7][2];
     bool is_segments_inverted;
     bool is_displays_inverted;
 } SSD_MGR_config_t;
 
-int8_t SSD_MGR_set(SSD_MGR_displays_t *display, uint8_t value);
+int8_t SSD_MGR_display_set(SSD_MGR_displays_t *display, uint8_t value);
 int8_t SSD_MGR_display_create(SSD_MGR_displays_t *display,
-        uint8_t const *config, uint8_t value);
+        uint8_t const *config);
 int8_t SSD_MGR_initialize(const SSD_MGR_config_t *config);
 #endif
