@@ -57,6 +57,7 @@ static const uint8_t dig_data[SSD_SENTINEL] =
     [SSD_CHAR_C]        = 0x39,
     [SSD_CHAR_F]        = 0x71,
     [SSD_CHAR_DEGREE]   = 0x63,
+    [SSD_SYMBOL_MINUS]  = 0x40
 };
 
 static void clear(void)
