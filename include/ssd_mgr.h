@@ -57,8 +57,8 @@ typedef struct
     bool is_displays_inverted;
 } SSD_MGR_config_t;
 
-int8_t SSD_MGR_display_set(SSD_MGR_displays_t *display, uint8_t value);
-int8_t SSD_MGR_display_create(SSD_MGR_displays_t *display,
+void SSD_MGR_display_set(SSD_MGR_displays_t *display, uint8_t value);
+void SSD_MGR_display_create(SSD_MGR_displays_t *display,
         uint8_t const *config);
-int8_t SSD_MGR_initialize(const SSD_MGR_config_t *config);
+void SSD_MGR_initialize(const SSD_MGR_config_t *config);
 #endif

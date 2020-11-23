@@ -21,6 +21,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#define DEBUG_APP_ID "SSDM"
+
 #include "ssd_mgr.h"
 #include <stddef.h>
 #include <stdio.h>
@@ -101,53 +103,40 @@ static void ssd_mgr_main(void)
     }
 }
 
-int8_t SSD_MGR_display_set(SSD_MGR_displays_t *display, uint8_t value)
+void SSD_MGR_display_set(SSD_MGR_displays_t *display, uint8_t value)
 {
-    if(display == NULL)
-    {
-        return -1;
-    }
+    ASSERT(display != NULL);
 
-    if(value >= SSD_SENTINEL)
+    if(value < SSD_SENTINEL)
     {
-        return -1;
+        display->value = value;
     }
-
-    display->value = value;
-    return 0;
 }
 
 
-int8_t SSD_MGR_display_create(SSD_MGR_displays_t *display,
+void SSD_MGR_display_create(SSD_MGR_displays_t *display,
         uint8_t const *config)
 {
-    if(display != NULL &&
-        config != NULL &&
-        displays_counter < ARRAY_SIZE(displays))
-    {
-        display->config = config;
-        display->value = 0u;
+    ASSERT(display != NULL);
+    ASSERT(config != NULL);
+    ASSERT(displays_counter < ARRAY_SIZE(displays));
 
-        GPIO_config_pin(config[0], config[1], GPIO_OUTPUT_PUSH_PULL);
-        displays[displays_counter] = display;
-        displays_counter++;
-        return 0;
-    }
+    display->config = config;
+    display->value = 0u;
 
-    return -1;
+    GPIO_config_pin(config[0], config[1], GPIO_OUTPUT_PUSH_PULL);
+    displays[displays_counter] = display;
+    displays_counter++;
 }
 
-int8_t SSD_MGR_initialize(const SSD_MGR_config_t *config)
+void SSD_MGR_initialize(const SSD_MGR_config_t *config)
 {
-    if(config == NULL)
-    {
-        return -1;
-    }
+    ASSERT(config != NULL);
 
-    if(SYSTEM_register_task(ssd_mgr_main, 5u) != 0)
-    {
-        return -1;
-    }
+    int8_t ret = SYSTEM_register_task(ssd_mgr_main, 5u);
+
+    (void) ret;
+    ASSERT(ret == 0);
 
     for(uint8_t i = 0; i < ARRAY_2D_ROW(config->segments); i++)
     {
@@ -156,5 +145,4 @@ int8_t SSD_MGR_initialize(const SSD_MGR_config_t *config)
     }
 
     ssd_config = config;
-    return 0;
 }
