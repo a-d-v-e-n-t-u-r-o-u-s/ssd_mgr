@@ -29,6 +29,7 @@
 #include <string.h>
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/interrupt.h>
 #include <assert.h>
 #include "system.h"
 #include "debug.h"
@@ -89,20 +90,6 @@ static void set_display(uint8_t const *config)
             !ssd_config->is_displays_inverted);
 }
 
-
-static void ssd_mgr_main(void)
-{
-    if(displays_counter != 0U)
-    {
-        SSD_MGR_displays_t const *display = displays[display_no];
-        clear();
-        set_segments(dig_data[display->value]);
-        set_display(display->config);
-        display_no++;
-        display_no %= displays_counter;
-    }
-}
-
 void SSD_MGR_display_set(SSD_MGR_displays_t *display, uint8_t value)
 {
     ASSERT(display != NULL);
@@ -129,20 +116,37 @@ void SSD_MGR_display_create(SSD_MGR_displays_t *display,
     displays_counter++;
 }
 
+ISR(TIMER2_OVF_vect)
+{
+    if(displays_counter != 0U)
+    {
+        SSD_MGR_displays_t const *display = displays[display_no];
+        clear();
+        set_segments(dig_data[display->value]);
+        set_display(display->config);
+        display_no++;
+        display_no %= displays_counter;
+    }
+}
+
+ISR(TIMER2_COMP_vect)
+{
+    clear();
+}
+
 void SSD_MGR_initialize(const SSD_MGR_config_t *config)
 {
     ASSERT(config != NULL);
-
-    int8_t ret = SYSTEM_register_task(ssd_mgr_main, 5u);
-
-    (void) ret;
-    ASSERT(ret == 0);
 
     for(uint8_t i = 0; i < ARRAY_2D_ROW(config->segments); i++)
     {
         GPIO_config_pin(config->segments[i][0],
                 config->segments[i][1], GPIO_OUTPUT_PUSH_PULL);
     }
+
+    TCCR2 = (3u << 1u);
+    TIMSK |= (3u << 6u);
+    OCR2 = UINT8_MAX;
 
     ssd_config = config;
 }
