@@ -21,7 +21,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#define DEBUG_APP_ID "SSDM"
+#define DEBUG_APP_ID    "SSDM"
+#define DEBUG_ENABLED   DEBUG_SSDM_ENABLED
+#define DEBUG_LEVEL     DEBUG_SSDM_LEVEL
 
 #include "ssd_mgr.h"
 #include <stddef.h>
