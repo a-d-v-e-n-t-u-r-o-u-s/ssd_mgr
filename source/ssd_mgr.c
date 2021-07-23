@@ -40,6 +40,8 @@
 
 #define SSD_MGR_MAX_MULTIPLEXED_DISPLAYS        4U
 
+STATIC_ASSERT((F_CPU == 16000000UL), F_CPU_not_supported);
+
 static uint8_t displays_counter;
 static uint8_t display_no;
 static SSD_MGR_config_t const *ssd_config;
