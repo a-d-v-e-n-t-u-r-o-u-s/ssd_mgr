@@ -26,6 +26,7 @@
 #define DEBUG_LEVEL     DEBUG_SSDM_LEVEL
 
 #include "ssd_mgr.h"
+#include "hardware.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
