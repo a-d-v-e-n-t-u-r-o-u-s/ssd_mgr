@@ -46,19 +46,19 @@
 
 typedef struct
 {
-    uint8_t const *config;
+    uint8_t config;
     uint8_t value;
 } SSD_MGR_displays_t;
 
 typedef struct
 {
-    uint8_t segments[7][2];
+    SSD_MGR_displays_t *disp_config;
+    uint8_t disp_config_size;
     bool is_segments_inverted;
     bool is_displays_inverted;
 } SSD_MGR_config_t;
 
 void SSD_MGR_display_set(SSD_MGR_displays_t *display, uint8_t value);
-void SSD_MGR_display_create(SSD_MGR_displays_t *display,
-        uint8_t const *config);
-void SSD_MGR_initialize(const SSD_MGR_config_t *config);
+void SSD_MGR_display_create(SSD_MGR_displays_t *display, uint8_t config);
+void SSD_MGR_initialize(void);
 #endif

@@ -33,6 +33,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
+#include <avr/pgmspace.h>
 #include <assert.h>
 #include "system.h"
 #include "debug.h"
@@ -44,11 +45,9 @@ STATIC_ASSERT((F_CPU == 16000000UL), F_CPU_not_supported);
 
 static uint8_t displays_counter;
 static uint8_t display_no;
-static SSD_MGR_config_t const *ssd_config;
 static SSD_MGR_displays_t *displays[SSD_MGR_MAX_MULTIPLEXED_DISPLAYS];
 
-/*! \todo make it really in FLASH memory */
-static const uint8_t dig_data[SSD_SENTINEL] =
+static const uint8_t dig_data[SSD_SENTINEL] PROGMEM =
 {
     [SSD_DIGIT_0]       = 0x3F,
     [SSD_DIGIT_1]       = 0x06,
@@ -70,29 +69,43 @@ static const uint8_t dig_data[SSD_SENTINEL] =
 
 static void clear(void)
 {
+    const bool is_displays_inverted = pgm_read_byte(&ssd_config.is_displays_inverted);
+
     for(uint8_t i = 0u; i < displays_counter;  i++)
     {
-        GPIO_write_pin(displays[i]->config[0],
-                displays[i]->config[1],
-                ssd_config->is_displays_inverted);
+        GPIO_write_pin(displays[i]->config, is_displays_inverted);
     }
 }
 
 static void set_segments(uint8_t segs)
 {
-    for(uint8_t i = 0u; i < ARRAY_2D_ROW(ssd_config->segments); i++)
+    const bool is_segments_inverted  = pgm_read_byte(&ssd_config.is_segments_inverted);
+
+    for(uint8_t i = 0u; i < 7u; i++)
     {
         const bool val = (((segs >> i ) & 0x01u) != 0u);
-        GPIO_write_pin(ssd_config->segments[i][0],
-                ssd_config->segments[i][1],
-                ssd_config->is_segments_inverted ? !val : val);
+
+        uint8_t id = GPIO_CHANNEL_SEGMENTA;
+        switch(i)
+        {
+            case 0: id = GPIO_CHANNEL_SEGMENTA ; break;
+            case 1: id = GPIO_CHANNEL_SEGMENTB ; break;
+            case 2: id = GPIO_CHANNEL_SEGMENTC ; break;
+            case 3: id = GPIO_CHANNEL_SEGMENTD ; break;
+            case 4: id = GPIO_CHANNEL_SEGMENTE ; break;
+            case 5: id = GPIO_CHANNEL_SEGMENTF ; break;
+            case 6: id = GPIO_CHANNEL_SEGMENTG ; break;
+        }
+
+        GPIO_write_pin(id, is_segments_inverted ? !val : val);
     }
 }
 
-static void set_display(uint8_t const *config)
+static void set_display(uint8_t config)
 {
-    GPIO_write_pin(config[0], config[1],
-            !ssd_config->is_displays_inverted);
+    const bool is_displays_inverted = pgm_read_byte(&ssd_config.is_displays_inverted);
+
+    GPIO_write_pin(config, !is_displays_inverted);
 }
 
 void SSD_MGR_display_set(SSD_MGR_displays_t *display, uint8_t value)
@@ -107,16 +120,14 @@ void SSD_MGR_display_set(SSD_MGR_displays_t *display, uint8_t value)
 
 
 void SSD_MGR_display_create(SSD_MGR_displays_t *display,
-        uint8_t const *config)
+        uint8_t config)
 {
     ASSERT(display != NULL);
-    ASSERT(config != NULL);
     ASSERT(displays_counter < ARRAY_SIZE(displays));
 
     display->config = config;
     display->value = 0u;
 
-    GPIO_config_pin(config[0], config[1], GPIO_OUTPUT_PUSH_PULL);
     displays[displays_counter] = display;
     displays_counter++;
 }
@@ -127,7 +138,7 @@ ISR(TIMER2_OVF_vect)
     {
         SSD_MGR_displays_t const *display = displays[display_no];
         clear();
-        set_segments(dig_data[display->value]);
+        set_segments(pgm_read_byte(&dig_data[display->value]));
         set_display(display->config);
         display_no++;
         display_no %= displays_counter;
@@ -139,19 +150,9 @@ ISR(TIMER2_COMP_vect)
     clear();
 }
 
-void SSD_MGR_initialize(const SSD_MGR_config_t *config)
+void SSD_MGR_initialize(void)
 {
-    ASSERT(config != NULL);
-
-    for(uint8_t i = 0; i < ARRAY_2D_ROW(config->segments); i++)
-    {
-        GPIO_config_pin(config->segments[i][0],
-                config->segments[i][1], GPIO_OUTPUT_PUSH_PULL);
-    }
-
     TCCR2 = (3u << 1u);
     TIMSK |= (3u << 6u);
     OCR2 = UINT8_MAX;
-
-    ssd_config = config;
 }
