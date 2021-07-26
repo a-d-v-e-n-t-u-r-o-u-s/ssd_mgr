@@ -83,7 +83,7 @@ static void set_segments(uint8_t segs)
 
     for(uint8_t i = 0u; i < 7u; i++)
     {
-        const bool val = (((segs >> i ) & 0x01u) != 0u);
+        const bool val = ((((uint8_t)(segs >> i )) & 0x01u) != 0u);
 
         uint8_t id = GPIO_CHANNEL_SEGMENTA;
         switch(i)
