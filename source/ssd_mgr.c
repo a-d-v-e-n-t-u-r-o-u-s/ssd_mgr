@@ -28,7 +28,6 @@
 #include "ssd_mgr.h"
 #include "hardware.h"
 #include <stddef.h>
-#include <stdio.h>
 #include <string.h>
 #include <avr/io.h>
 #include <util/delay.h>
@@ -95,6 +94,9 @@ static void set_segments(uint8_t segs)
             case 4: id = GPIO_CHANNEL_SEGMENTE ; break;
             case 5: id = GPIO_CHANNEL_SEGMENTF ; break;
             case 6: id = GPIO_CHANNEL_SEGMENTG ; break;
+            default:
+                ASSERT(false);
+                break;
         }
 
         GPIO_write_pin(id, is_segments_inverted ? !val : val);
