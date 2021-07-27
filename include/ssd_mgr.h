@@ -52,8 +52,6 @@ typedef struct
 
 typedef struct
 {
-    SSD_MGR_displays_t *disp_config;
-    uint8_t disp_config_size;
     bool is_segments_inverted;
     bool is_displays_inverted;
 } SSD_MGR_config_t;
