@@ -39,6 +39,7 @@
 #include "common.h"
 
 #define SSD_MGR_MAX_MULTIPLEXED_DISPLAYS        4U
+#define SEGMENTS_AMOUNT                         (7u)
 
 STATIC_ASSERT((F_CPU == 16000000UL), F_CPU_not_supported);
 
@@ -80,7 +81,7 @@ static void set_segments(uint8_t segs)
 {
     const bool is_segments_inverted  = pgm_read_byte(&ssd_config.is_segments_inverted);
 
-    for(uint8_t i = 0u; i < 7u; i++)
+    for(uint8_t i = 0u; i < SEGMENTS_AMOUNT; i++)
     {
         const bool val = ((((uint8_t)(segs >> i )) & 0x01u) != 0u);
 
