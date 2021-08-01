@@ -62,7 +62,9 @@ static const uint8_t dig_data[SSD_SENTINEL] PROGMEM =
     [SSD_BLANK]         = 0x00,
     [SSD_CHAR_h]        = 0x74,
     [SSD_CHAR_C]        = 0x39,
+    [SSD_CHAR_E]        = 0x79,
     [SSD_CHAR_F]        = 0x71,
+    [SSD_CHAR_r]        = 0x50,
     [SSD_CHAR_DEGREE]   = 0x63,
     [SSD_SYMBOL_MINUS]  = 0x40
 };
