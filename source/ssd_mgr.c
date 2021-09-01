@@ -152,7 +152,7 @@ ISR(TIMER2_OVF_vect)
         SSD_MGR_displays_t const *display = displays[display_no];
         clear();
         set_segments(pgm_read_byte(&dig_data[display->value]));
-        if(!display->is_blinking || (refresh_counter < 100))
+        if((!display->is_blinking) || (refresh_counter < 100))
         {
             set_display(display->config);
         }
