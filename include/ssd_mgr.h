@@ -50,6 +50,7 @@ typedef struct
 {
     uint8_t config;
     uint8_t value;
+    bool is_blinking;
 } SSD_MGR_displays_t;
 
 typedef struct
@@ -58,6 +59,7 @@ typedef struct
     bool is_displays_inverted;
 } SSD_MGR_config_t;
 
+void SSD_MGR_display_blink(SSD_MGR_displays_t *display, bool is_blinking);
 void SSD_MGR_display_set(SSD_MGR_displays_t *display, uint8_t value);
 void SSD_MGR_display_create(SSD_MGR_displays_t *display, uint8_t config);
 void SSD_MGR_initialize(void);

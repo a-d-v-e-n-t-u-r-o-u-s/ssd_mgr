@@ -45,6 +45,7 @@ STATIC_ASSERT((F_CPU == 16000000UL), F_CPU_not_supported);
 
 static uint8_t displays_counter;
 static uint8_t display_no;
+static uint16_t refresh_counter;
 static SSD_MGR_displays_t *displays[SSD_MGR_MAX_MULTIPLEXED_DISPLAYS];
 
 static const uint8_t dig_data[SSD_SENTINEL] PROGMEM =
@@ -123,6 +124,12 @@ void SSD_MGR_display_set(SSD_MGR_displays_t *display, uint8_t value)
     }
 }
 
+void SSD_MGR_display_blink(SSD_MGR_displays_t *display, bool is_blinking)
+{
+    ASSERT(display != NULL);
+    display->is_blinking = is_blinking;
+}
+
 
 void SSD_MGR_display_create(SSD_MGR_displays_t *display,
         uint8_t config)
@@ -137,6 +144,7 @@ void SSD_MGR_display_create(SSD_MGR_displays_t *display,
     displays_counter++;
 }
 
+
 ISR(TIMER2_OVF_vect)
 {
     if(displays_counter != 0U)
@@ -144,8 +152,13 @@ ISR(TIMER2_OVF_vect)
         SSD_MGR_displays_t const *display = displays[display_no];
         clear();
         set_segments(pgm_read_byte(&dig_data[display->value]));
-        set_display(display->config);
+        if(!display->is_blinking || (refresh_counter < 100))
+        {
+            set_display(display->config);
+        }
         display_no++;
+        refresh_counter++;
+        refresh_counter %= 200U;
         display_no %= displays_counter;
     }
 }
