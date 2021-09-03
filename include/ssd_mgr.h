@@ -44,7 +44,10 @@
 #define SSD_CHAR_r          (15u)
 #define SSD_CHAR_DEGREE     (16u)
 #define SSD_SYMBOL_MINUS    (17u)
-#define SSD_SENTINEL        (18u)
+#define SSD_CHAR_A          (18U)
+#define SSD_CHAR_n          (19U)
+#define SSD_CHAR_P          (20U)
+#define SSD_SENTINEL        (21u)
 
 typedef struct
 {
