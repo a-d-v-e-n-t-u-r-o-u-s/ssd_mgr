@@ -138,7 +138,7 @@ void SSD_MGR_display_create(SSD_MGR_displays_t *display,
         uint8_t config)
 {
     ASSERT(display != NULL);
-    ASSERT(displays_counter < ARRAY_SIZE(displays));
+    ASSERT(displays_counter < (uint8_t)(sizeof(displays)/sizeof(displays[0])));
 
     display->config = config;
     display->value = 0u;
